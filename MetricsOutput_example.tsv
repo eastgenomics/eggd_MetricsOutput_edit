@@ -1,0 +1,72 @@
+TruSight Oncology 500 - Metrics Output														
+For Research Use Only. Not for use in diagnostic procedures.														
+														
+[Header]														
+Output Date	2023-10-21													
+Output Time	17:12:12													
+Workflow Version	ruo-2.2.0.12													
+														
+[Run QC Metrics]														
+Metric (UOM)	LSL Guideline	USL Guideline	Value											
+PCT_PF_READS (%)	55.0	NA	60.7											
+PCT_Q30_R1 (%)	80.0	NA	95.5											
+PCT_Q30_R2 (%)	80.0	NA	95.5											
+														
+[Analysis Status]														
+	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12		
+COMPLETED_ALL_STEPS	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	TRUE	TRUE	FALSE		
+FAILED_STEPS	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA		
+STEPS_NOT_EXECUTED	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA		
+														
+[DNA Library QC Metrics]														
+Metric (UOM)	LSL Guideline	USL Guideline	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12
+CONTAMINATION_SCORE (NA)	0	3106	535	6283	423	399	182	0	1395	233	907	151	226	6737
+CONTAMINATION_P_VALUE (NA)	0.000	0.049	0.940	0.000	1.000	0.974	1.000	1.000	0.997	1.000	0.999	1.000	1.000	1.000
+														
+[DNA Library QC Metrics for Small Variant Calling and TMB]														
+Metric (UOM)	LSL Guideline	USL Guideline	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12
+MEDIAN_INSERT_SIZE (bp)	70	NA	68	108	79	65	70	50	73	69	66	74	79	102
+MEDIAN_EXON_COVERAGE (Count)	150	NA	32	520	123	9	106	0	120	58	111	61	58	156
+PCT_EXON_50X (%)	90.0	NA	19.1	99.2	90.6	0.0	88.7	0.0	89.7	61.0	86.7	64.1	63.1	97.8
+														
+[DNA Library QC Metrics for MSI]														
+Metric (UOM)	LSL Guideline	USL Guideline	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12
+USABLE_MSI_SITES (Count)	40	NA	0	98	2	0	1	0	1	0	0	0	0	62
+														
+[DNA Library QC Metrics for CNV]														
+Metric (UOM)	LSL Guideline	USL Guideline	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12
+COVERAGE_MAD (Count)	0.000	0.210	0.219	0.170	0.189	0.248	0.152	0.000	0.268	0.165	0.198	0.167	0.175	0.103
+MEDIAN_BIN_COUNT_CNV_TARGET (Count)	1.0	NA	0.6	6.9	1.9	0.2	1.8	0.0	2.0	1.0	2.0	1.0	0.9	2.2
+														
+[DNA Expanded Metrics]														
+Metric (UOM)	LSL Guideline	USL Guideline	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12
+TOTAL_PF_READS (Count)	NA	NA	74549638	275264552	89609154	19110678	164703558	3244466	157462298	67482368	137250366	69654122	81239022	279210136
+MEAN_FAMILY_SIZE (Count)	NA	NA	21.1	8.9	8.3	16.6	11.5	16.4	12.9	15.0	10.9	14.0	17.1	31.6
+MEDIAN_TARGET_COVERAGE (Count)	NA	NA	31.0	508.0	116.0	9.0	101.0	0.0	116.0	55.0	106.0	59.0	57.0	154.0
+PCT_CHIMERIC_READS (%)	NA	NA	0.36	0.15	0.11	0.08	0.10	0.04	0.12	0.43	0.16	0.10	0.11	0.16
+PCT_EXON_100X (%)	NA	NA	1.1	98.6	63.8	0.0	55.0	0.0	62.0	8.9	57.2	12.8	8.0	87.4
+PCT_READ_ENRICHMENT (%)	NA	NA	86.5	83.7	85.2	86.1	82.1	76.3	85.2	87.3	84.7	86.9	86.4	86.4
+PCT_USABLE_UMI_READS (%)	NA	NA	100.0	100.0	99.9	99.9	100.0	99.8	100.0	100.0	100.0	100.0	100.0	100.0
+MEAN_TARGET_COVERAGE (Count)	NA	NA	34.1	542.0	129.5	10.0	104.0	0.2	131.4	56.6	113.9	60.9	58.6	150.9
+PCT_ALIGNED_READS (%)	NA	NA	73.2	95.1	79.1	70.0	54.5	10.0	75.9	92.2	70.2	84.8	81.7	97.5
+PCT_CONTAMINATION_EST (%)	NA	NA	15.2	8.7	3.6	30.2	3.2	0.0	9.0	6.7	5.4	11.1	13.6	7.0
+PCT_PF_UQ_READS (%)	NA	NA	100.0	100.0	100.0	100.0	100.0	100.0	100.0	100.0	100.0	100.0	100.0	100.0
+PCT_TARGET_0.4X_MEAN (%)	NA	NA	86.5	94.5	86.6	84.5	89.5	15.4	86.1	87.9	85.7	87.7	89.6	95.9
+PCT_TARGET_100X (%)	NA	NA	1.5	97.6	59.5	0.0	51.5	0.0	59.4	7.8	53.9	11.6	7.7	86.5
+PCT_TARGET_250X (%)	NA	NA	0.0	92.9	7.5	0.0	0.4	0.0	7.8	0.0	3.1	0.0	0.1	1.7
+														
+[RNA Library QC Metrics]														
+Metric (UOM)	LSL Guideline	USL Guideline	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12
+MEDIAN_CV_GENE_500X (NA)	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA
+TOTAL_ON_TARGET_READS (NA)	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA
+MEDIAN_INSERT_SIZE (NA)	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA
+														
+[RNA Expanded Metrics]														
+Metric (UOM)	LSL Guideline	USL Guideline	Sample1	Sample2	Sample3	Sample4	Sample5	Sample6	Sample7	Sample8	Sample9	Sample10	Sample11	Sample12
+PCT_CHIMERIC_READS (NA)	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA
+PCT_ON_TARGET_READS (NA)	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA
+SCALED_MEDIAN_GENE_COVERAGE (NA)	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA
+TOTAL_PF_READS (NA)	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA
+														
+[Notes]														
+Run Metrics	Run Metrics are not generated and values are reported as NA when starting analysis from FASTQ files.													
