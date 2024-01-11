@@ -29,7 +29,7 @@ RED_FILL = PatternFill("solid", fgColor="FFC7CE")
 
 class Excel():
     """
-    Functions for formatting excel data with the appropriate style and 
+    Functions for formatting excel data with the appropriate style and
     writing output file
 
     Attributes
@@ -64,7 +64,7 @@ class Excel():
 
     def mark_false(self) -> None:
         """
-        Mark in red all cells with string FALSE 
+        Mark in red all cells with string FALSE
         """
         string_to_find = "FALSE"
         false_cells_indices = self.df.stack().index[self.df.stack() == string_to_find]
@@ -76,11 +76,13 @@ class Excel():
 
     def mark_contamination_metrics(self) -> None:
         """
-        Mark in red the DNA Library QC metrics when values exceed the guidelines
+        Mark in red the DNA Library QC metrics when values
+        exceed the guidelines
         """
-        elements_to_find = ["CONTAMINATION_SCORE (NA)", "CONTAMINATION_P_VALUE (NA)"]
+        elements_to_find = ["CONTAMINATION_SCORE (NA)",
+                            "CONTAMINATION_P_VALUE (NA)"]
 
-        for sample_col_index in range(3,len(self.df.columns)):
+        for sample_col_index in range(3, len(self.df.columns)):
             for element in elements_to_find:
                 indices = self.df.stack().index[self.df.stack() == element]
                 for idx in indices:
@@ -112,16 +114,23 @@ class Excel():
 
     def mark_other_metrics(self):
         """
-        Mark in red the DNA Library QC metrics when values exceed the guidelines
+        Mark in red the DNA Library QC metrics when
+        values exceed the guidelines
         """
 
         max_column = get_column_letter(self.ws.max_column)
-        metrics_to_find = ['MEDIAN_INSERT_SIZE (bp)', 'MEDIAN_EXON_COVERAGE (Count)',
-                           'PCT_EXON_50X (%)', 'USABLE_MSI_SITES (Count)',
-                           'COVERAGE_MAD (Count)', 'MEDIAN_BIN_COUNT_CNV_TARGET (Count)',
-                           'MEDIAN_CV_GENE_500X (NA)', 'TOTAL_ON_TARGET_READS (NA)',
-                           'MEDIAN_INSERT_SIZE (NA)', 'PCT_CHIMERIC_READS (NA)',
-                           'PCT_ON_TARGET_READS (NA)', 'SCALED_MEDIAN_GENE_COVERAGE (NA)',
+        metrics_to_find = ['MEDIAN_INSERT_SIZE (bp)',
+                           'MEDIAN_EXON_COVERAGE (Count)',
+                           'PCT_EXON_50X (%)',
+                           'USABLE_MSI_SITES (Count)',
+                           'COVERAGE_MAD (Count)',
+                           'MEDIAN_BIN_COUNT_CNV_TARGET (Count)',
+                           'MEDIAN_CV_GENE_500X (NA)',
+                           'TOTAL_ON_TARGET_READS (NA)',
+                           'MEDIAN_INSERT_SIZE (NA)',
+                           'PCT_CHIMERIC_READS (NA)',
+                           'PCT_ON_TARGET_READS (NA)',
+                           'SCALED_MEDIAN_GENE_COVERAGE (NA)',
                            'TOTAL_PF_READS (NA)']
         for metric in metrics_to_find:
             indices = self.df.stack().index[self.df.stack() == metric]
@@ -141,8 +150,10 @@ class Excel():
                 operator = 'notBetween'
                 formula = [LSL, USL]
             rule = CellIsRule(operator=operator, formula=formula,
-                                stopIfTrue=False, fill=RED_FILL, font=RED_TEXT)
-            self.ws.conditional_formatting.add(f'D{row+1}:{max_column}{row+1}', rule)
+                                stopIfTrue=False, fill=RED_FILL,
+                                font=RED_TEXT)
+            self.ws.conditional_formatting.add(f'D{row+1}:{max_column}{row+1}',
+                                               rule)
 
 
 def parse_args() -> argparse.Namespace:
