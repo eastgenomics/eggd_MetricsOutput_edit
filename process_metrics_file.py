@@ -1,26 +1,148 @@
 """
-I want to create a function that converts the given MetricsOutput.tsv
-file into a MetricsOutput.xlsx file that does the following changes
+Python app that takes the  MetricsOutput.tsv file and creates the
+MetricsOutput.xlsx file that does the following changes
 
 Changes:
-    - from rows 16-16, move data 2 cells to the right from column B
+    - from rows 16-19, move data 2 cells to the right from column B
     - from row 17, higlight in red any cell that says FALSE
-    - set a variable for threshold cells in B&C 
+    - set a variable for threshold cells in columns B and C
         - [DNA Library QC Metrics] 23-24
         - [DNA Library QC Metrics for Small Variant Calling and TMB] 28-30
         - [DNA Library QC Metrics for MSI] 34
-        - [DNA Library QC Metrics for CNV] 37-38
+        - [DNA Library QC Metrics for CNV] 38-39
         - [RNA Library QC Metrics] 60-62
         - [RNA Expanded Metrics] 66-69
     - highlight the subsequent cells if outside thresholds
+
 """
+
 import argparse
 import csv
 import openpyxl
+import pandas as pd
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font
-from openpyxl.styles.differential import DifferentialStyle
-from openpyxl.formatting.rule import CellIsRule, Rule
+from openpyxl.formatting.rule import CellIsRule
+
+RED_TEXT = Font(name='Calibri', color="9C0006")
+RED_FILL = PatternFill("solid", fgColor="FFC7CE")
+
+class Excel():
+    """
+    Functions for formatting excel data with the appropriate style and 
+    writing output file
+
+    Attributes
+    ----------
+    """
+    def __init__(self, file) -> None:
+        print(f"Editing excel file {file}")
+        self.file = file
+        self.wb = openpyxl.load_workbook(self.file)
+        self.ws = self.wb['Sheet']
+        self.ws.title = "MetricsOutput"
+        self.df = pd.DataFrame(self.ws.values)
+
+    def modify(self) -> None:
+        """
+        Calls all methods in excel() to generate output file
+        """
+        self.move_rows()
+        self.mark_false()
+        self.mark_contamination_metrics()
+        self.mark_other_metrics()
+        self.wb.save(self.file)
+        print("Done!")
+
+    def move_rows(self) -> None:
+        """
+        Move rows in a specific way
+        """
+        max_column = get_column_letter(self.ws.max_column - 2)
+        self.ws.move_range(f'B16:{max_column}19', cols=2)
+        self.df = pd.DataFrame(self.ws.values)
+
+    def mark_false(self) -> None:
+        """
+        Mark in red all cells with string FALSE 
+        """
+        string_to_find = "FALSE"
+        false_cells_indices = self.df.stack().index[self.df.stack() == string_to_find]
+        for idx in false_cells_indices:
+            row = idx[0]+1
+            excel_column = get_column_letter(idx[1]+1)
+            self.ws[f'{excel_column}{row}'].fill = RED_FILL
+            self.ws[f'{excel_column}{row}'].font = RED_TEXT
+
+    def mark_contamination_metrics(self) -> None:
+        """
+        Mark in red the DNA Library QC metrics when values exceed the guidelines
+        """
+        elements_to_find = ["CONTAMINATION_SCORE (NA)", "CONTAMINATION_P_VALUE (NA)"]
+
+        for sample_col_index in range(3,len(self.df.columns)):
+            for element in elements_to_find:
+                indices = self.df.stack().index[self.df.stack() == element]
+                for idx in indices:
+                    row = idx[0]
+                    first_column = idx[1]
+                    LSL_column_index = first_column + 1
+                    USL_column_index = first_column + 2
+
+                    value_to_compare = self.df.loc[row][sample_col_index]
+
+                    if first_column == 0:
+                        LSL = self.df.loc[row][LSL_column_index]
+                        USL = self.df.loc[row][USL_column_index]
+
+                if value_to_compare < LSL or value_to_compare > USL:
+                    sample_to_highlight = True
+                else:
+                    sample_to_highlight = False
+                    break
+
+            if sample_to_highlight is True:
+                for element in elements_to_find:
+                    indices = self.df.stack().index[self.df.stack() == element]
+                    for idx in indices:
+                        excel_row = idx[0]+1
+                        excel_column = get_column_letter(sample_col_index+1)
+                        self.ws[f'{excel_column}{excel_row}'].fill = RED_FILL
+                        self.ws[f'{excel_column}{excel_row}'].font = RED_TEXT
+
+    def mark_other_metrics(self):
+        """
+        Mark in red the DNA Library QC metrics when values exceed the guidelines
+        """
+
+        max_column = get_column_letter(self.ws.max_column)
+        metrics_to_find = ['MEDIAN_INSERT_SIZE (bp)', 'MEDIAN_EXON_COVERAGE (Count)',
+                           'PCT_EXON_50X (%)', 'USABLE_MSI_SITES (Count)',
+                           'COVERAGE_MAD (Count)', 'MEDIAN_BIN_COUNT_CNV_TARGET (Count)',
+                           'MEDIAN_CV_GENE_500X (NA)', 'TOTAL_ON_TARGET_READS (NA)',
+                           'MEDIAN_INSERT_SIZE (NA)', 'PCT_CHIMERIC_READS (NA)',
+                           'PCT_ON_TARGET_READS (NA)', 'SCALED_MEDIAN_GENE_COVERAGE (NA)',
+                           'TOTAL_PF_READS (NA)']
+        for metric in metrics_to_find:
+            indices = self.df.stack().index[self.df.stack() == metric]
+            for idx in indices:
+                row = idx[0]
+                LSL = self.df.loc[row][idx[1]+1]
+                USL = self.df.loc[row][idx[1]+2]
+            if LSL == 'NA' and USL == 'NA':
+                pass
+            elif LSL == 'NA':
+                operator = 'greaterThan'
+                formula = [USL]
+            elif USL == 'NA':
+                operator = 'lessThan'
+                formula = [LSL]
+            else:
+                operator = 'notBetween'
+                formula = [LSL, USL]
+            rule = CellIsRule(operator=operator, formula=formula,
+                                stopIfTrue=False, fill=RED_FILL, font=RED_TEXT)
+            self.ws.conditional_formatting.add(f'D{row+1}:{max_column}{row+1}', rule)
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,10 +166,10 @@ def parse_args() -> argparse.Namespace:
 
 def tsv_to_excel(input_filepath, output_filepath):
     """
-    Function which converts given .tsv file into excel file
+    Function which creates an excel file from a .tsv file.
 
     Args:
-        input_filepath (str)_
+        input_filepath (str)
         output_filepath (str)
 
     """
@@ -73,77 +195,6 @@ def tsv_to_excel(input_filepath, output_filepath):
     workbook_object.save(output_filepath)
 
 
-def edit_excel(excel_file):
-    """
-    Edits the given excel file as wanted
-
-    Args:
-        excel_file (str): filepath of the excel file.
-    """
-    wb = openpyxl.load_workbook(excel_file)
-    ws = wb['Sheet']
-    # Change name of sheet from excel workbook
-    ws.title = "MetricsOutput"
-
-    # Openpyxl.utils fuction get_column_letter() prints the letter of an column number
-    # e.g: get_column_letter(23) == 'W'
-    max_column = get_column_letter(ws.max_column)
-
-    # From rows 16-19, move data 2 cells to the right from column B
-    ws.move_range(f'B16:{max_column}19', cols=2)
-
-    # Colour cells in red if cells from row 17 contain FALSE
-    red_text = Font(name='Calibri', color="9C0006")
-    red_fill = PatternFill("solid", fgColor="FFC7CE")
-    dxf = DifferentialStyle(font=red_text, fill=red_fill)
-    rule = Rule(type="containsText", operator="containsText", text="FALSE", dxf=dxf)
-    ws.conditional_formatting.add(f'D17:{max_column}17', rule)
-
-    # Colour cells in red if contamination score and contamination p value are outside USL
-    CONTAMINATION_SCORE_ROW = 23
-    usl_score = ws[f'C{CONTAMINATION_SCORE_ROW}'].value
-
-    CONTAMINATION_P_VALUE_ROW = 24
-    usl_p_value = ws[f'C{CONTAMINATION_P_VALUE_ROW}'].value
-
-    for col in list(range(4,(ws.max_column))):
-        letter = get_column_letter(col)
-        score_to_compare = ws[f'{letter}{CONTAMINATION_SCORE_ROW}'].value
-        try:
-            if usl_score < score_to_compare:
-                p_value_to_compare = ws[f'{letter}{CONTAMINATION_P_VALUE_ROW}'].value
-                if usl_p_value < p_value_to_compare:
-                    ws[f'{letter}{CONTAMINATION_SCORE_ROW}'].fill = red_fill
-                    ws[f'{letter}{CONTAMINATION_P_VALUE_ROW}'].fill = red_fill
-                    ws[f'{letter}{CONTAMINATION_SCORE_ROW}'].font = red_text
-                    ws[f'{letter}{CONTAMINATION_P_VALUE_ROW}'].font = red_text
-        except TypeError:
-            pass
-
-    # Colour cells in red for the rows of interest
-    rows_to_format = [28, 29, 30, 34, 37, 38, 60,
-                      61, 62, 66, 67, 68, 69]
-    for row in rows_to_format:
-        LSL = ws[f'B{row}'].value
-        USL = ws[f'C{row}'].value
-        if LSL == 'NA' and USL == 'NA':
-            pass
-        elif LSL == 'NA':
-            operator = 'greaterThan'
-            formula = [USL]
-        elif USL == 'NA':
-            operator = 'lessThan'
-            formula = [LSL]
-        else:
-            operator = 'notBetween'
-            formula = [LSL, USL]
-        rule = CellIsRule(operator=operator, formula=formula,
-                          stopIfTrue=False, fill=red_fill, font=red_text)
-        ws.conditional_formatting.add(f'D{row}:{max_column}{row}', rule)
-
-    wb.save(excel_file)
-
-
 def main():
     """
     Main entry points to run the script. Creates an .xlsx file when run correctly
@@ -151,7 +202,9 @@ def main():
     args = parse_args()
 
     tsv_to_excel(args.tsv_input, args.output_filename)
-    edit_excel(args.output_filename)
+
+    excel_file = Excel(args.output_filename)
+    excel_file.modify()
 
     print(args.tsv_input)
     print(args.output_filename)
