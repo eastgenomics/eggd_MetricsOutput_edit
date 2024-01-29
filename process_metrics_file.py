@@ -37,28 +37,39 @@ class Excel():
     """
     def __init__(self, file) -> None:
         print(f"Editing excel file {file}")
+        # String with excel filename
         self.file = file
+        # Workbook of excel file
         self.wb = openpyxl.load_workbook(self.file)
+        # Worksheet of interest from excel file
         self.ws = self.wb['Sheet']
+        # Change the worksheet name to MetricsOutput
         self.ws.title = "MetricsOutput"
+        # Set a pandas dataframe which reflects the contents of the worksheet
         self.df = pd.DataFrame(self.ws.values)
 
     def modify(self) -> None:
         """
-        Calls all methods in excel() to generate output file
+        Calls all methods in excel() to modify and generate output file with desired changes
         """
         self.move_rows()
         self.mark_false()
         self.mark_contamination_metrics()
         self.mark_other_metrics()
         self.wb.save(self.file)
-        print("Done!")
+        print(f"Done! {self.file} file generated")
 
     def move_rows(self) -> None:
         """
-        Move rows in a specific way
+        Excel method which modifies its input by moving the set of rows 
+        from 16 to 19 by 2 columns towards the right. 
+
+        This is to shift the [Analysis status] table to allign sample metrics with the rest
+        of the tables from the excel file.
         """
+        # Obtain the last column letter of the excel file and store it a variable
         max_column = get_column_letter(self.ws.max_column - 2)
+
         self.ws.move_range(f'B16:{max_column}19', cols=2)
         self.df = pd.DataFrame(self.ws.values)
 
@@ -67,7 +78,10 @@ class Excel():
         Mark in red all cells with string FALSE
         """
         string_to_find = "FALSE"
+        # store a list of cell indices where the contain a string equal to "FALSE"
         false_cells_indices = self.df.stack().index[self.df.stack() == string_to_find]
+
+        # Mark every cell from the list in red
         for idx in false_cells_indices:
             row = idx[0]+1
             excel_column = get_column_letter(idx[1]+1)
@@ -77,12 +91,14 @@ class Excel():
     def mark_contamination_metrics(self) -> None:
         """
         Mark in red the DNA Library QC metrics when values
-        exceed the guidelines
+        exceed the guidelines on all metrics from the elements_to_find list
         """
         elements_to_find = ["CONTAMINATION_SCORE (NA)",
                             "CONTAMINATION_P_VALUE (NA)"]
 
+        # Set a loop for each sample
         for sample_col_index in range(3, len(self.df.columns)):
+            # Set loop for each metric
             for element in elements_to_find:
                 indices = self.df.stack().index[self.df.stack() == element]
                 for idx in indices:
@@ -93,16 +109,21 @@ class Excel():
 
                     value_to_compare = self.df.loc[row][sample_col_index]
 
+                    # Ensure that each string from the elements_to_find are found in the 
+                    # first column
                     if first_column == 0:
                         LSL = self.df.loc[row][LSL_column_index]
                         USL = self.df.loc[row][USL_column_index]
 
+                # Store a boolean for each sample and set to false when any metric does
+                # not exceed the USL and LSL thresholds
                 if value_to_compare < LSL or value_to_compare > USL:
                     sample_to_highlight = True
                 else:
                     sample_to_highlight = False
                     break
 
+            # If boolean remains true, highlight every value from that sample column
             if sample_to_highlight is True:
                 for element in elements_to_find:
                     indices = self.df.stack().index[self.df.stack() == element]
@@ -132,12 +153,19 @@ class Excel():
                            'PCT_ON_TARGET_READS (NA)',
                            'SCALED_MEDIAN_GENE_COVERAGE (NA)',
                            'TOTAL_PF_READS (NA)']
+        
+        # Search for the cell location for every metric from metrics_to_find list
         for metric in metrics_to_find:
             indices = self.df.stack().index[self.df.stack() == metric]
+
+            # Once cell found, assign variables to USL and LSL guidelines
             for idx in indices:
                 row = idx[0]
                 LSL = self.df.loc[row][idx[1]+1]
                 USL = self.df.loc[row][idx[1]+2]
+            
+            # Select the appropriate operator and formula based on the the values of LSL
+            # and USL
             if LSL == 'NA' and USL == 'NA':
                 pass
             elif LSL == 'NA':
@@ -149,6 +177,8 @@ class Excel():
             else:
                 operator = 'notBetween'
                 formula = [LSL, USL]
+            
+            # for every row, apply selected operator and formula to highlight cells 
             rule = CellIsRule(operator=operator, formula=formula,
                                 stopIfTrue=False, fill=RED_FILL,
                                 font=RED_TEXT)
@@ -187,6 +217,7 @@ def tsv_to_excel(input_filepath, output_filepath):
     workbook_object = openpyxl.Workbook()
     worksheet = workbook_object.active
 
+    # Convert .tsv file to excel
     with open(input_filepath, 'r', encoding='UTF-8') as csvfile:
         read_tsv = csv.reader(csvfile, delimiter = '\t')
         for row in read_tsv:
