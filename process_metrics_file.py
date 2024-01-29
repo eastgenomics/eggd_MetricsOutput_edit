@@ -83,7 +83,7 @@ class Excel():
         string_to_find = "FALSE"
         # store a list of cell indices where the contain a string equal to
         # "FALSE"
-        false_cells_indices = self.df.stack().index[self.df.stack() == 
+        false_cells_indices = self.df.stack().index[self.df.stack() ==
                                                     string_to_find]
 
         # Mark every cell from the list in red
@@ -182,7 +182,7 @@ class Excel():
             else:
                 operator = 'notBetween'
                 formula = [LSL, USL]
-            
+
             # for every row, apply selected operator and formula
             # to highlight cells
             rule = CellIsRule(operator=operator, formula=formula,
