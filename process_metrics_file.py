@@ -18,6 +18,7 @@ Changes:
 
 import argparse
 import csv
+from os import remove
 import openpyxl
 import pandas as pd
 from openpyxl.utils import get_column_letter
@@ -78,17 +79,21 @@ class Excel():
 
     def mark_false(self) -> None:
         """
-        Mark in red all cells with string FALSE
+        Mark in red all cells with string FALSE.
+        An error will be raised if the string is found outside of row 17
+
         """
         string_to_find = "FALSE"
         # store a list of cell indices where the contain a string equal to
         # "FALSE"
         false_cells_indices = self.df.stack().index[self.df.stack() ==
                                                     string_to_find]
-
         # Mark every cell from the list in red
         for idx in false_cells_indices:
             row = idx[0]+1
+            if row != 17:
+                remove(self.file)
+                raise TypeError("FALSE string found outside expected row.")
             excel_column = get_column_letter(idx[1]+1)
             self.ws[f'{excel_column}{row}'].fill = RED_FILL
             self.ws[f'{excel_column}{row}'].font = RED_TEXT
