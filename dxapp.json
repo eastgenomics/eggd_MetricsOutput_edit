@@ -11,16 +11,16 @@
       "class": "file",
       "optional": false,
       "patterns": [
-        "*"
+        "*.tsv"
       ],
-      "help": ""
+      "help": "MetricsOutput.tsv report generated from the eggd_tso500 app"
     },
     {
       "name": "output_filename",
       "label": "OPTIONAL: Specify filename output",
       "class": "string",
       "optional": true,
-      "help": ""
+      "help": "Optional input to specify desired filename output."
     }
   ],
   "outputSpec": [
@@ -37,7 +37,7 @@
   "runSpec": {
     "timeoutPolicy": {
       "*": {
-        "hours": 48
+        "hours": 1
       }
     },
     "interpreter": "bash",
