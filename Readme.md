@@ -12,7 +12,7 @@ This app produces the MetricsOutput.xlsx with relevant metrics highlighted per s
 - `output_filename` (`str`) - a string to specify the filename for the .xlsx output. When not specified, filename 'MetricsOutput.xlsx' is used.
 
 ## How does this app work?
-The app runs a python script to create an .xlsx file from the provided .tsv file and modifies the .xlsx file in accordance to the [Helios Manual v10][helios-manual]. The general outline is as follows:
+The app runs a python script to create an .xlsx file from the provided .tsv file and modifies the .xlsx file in accordance to the [Helios Manual][helios-manual]. The general outline is as follows:
 
 - download the provided MetricsOutput.tsv file
 - create an .xlsx file from the .tsv file
