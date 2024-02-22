@@ -245,6 +245,7 @@ def tsv_to_excel(input_filepath, output_filepath):
                         # Convert to int if float not possible
                         converted_row.append(int(item))
                     except ValueError:
+                        # If no exceptions work, item is treated as str
                         converted_row.append(item)
             worksheet.append(converted_row)
 

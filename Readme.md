@@ -26,7 +26,7 @@ The app runs a python script to create an .xlsx file from the provided .tsv file
 ## What does this app output
 Returns a .xlsx file with all the requested changes. As an example, the figures below depicts how the excel file looks before and after any modifications implemented.
 
-- MetricsOutput file after any modifications:![alt text](images/before_change.png)
+- MetricsOutput file before any modifications:![alt text](images/before_change.png)
 - MetricsOutput file after any modifications:![alt text](images/after_change.png)
 
 
@@ -35,4 +35,4 @@ This is the source code for an app that runs on the DNAnexus Platform.
 For more information about how to run or modify it, see
 https://documentation.dnanexus.com/.
 
-[helios-manual]: https://cuhbioinformatics.atlassian.net/wiki/spaces/O/pages/3017506817/Helios+Manual+v10#Quality-Control
+[helios-manual]: https://cuhbioinformatics.atlassian.net/wiki/spaces/O/pages/3082190955/Live+cancer+guides
