@@ -24,9 +24,6 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font
 from openpyxl.formatting.rule import CellIsRule
 
-RED_TEXT = Font(name='Calibri', color="9C0006")
-RED_FILL = PatternFill("solid", fgColor="FFC7CE")
-
 
 class Excel():
     """
@@ -36,6 +33,10 @@ class Excel():
     Attributes
     ----------
     """
+    # Set a characteristics for highlighted columns
+    RED_TEXT = Font(name='Calibri', color="9C0006")
+    RED_FILL = PatternFill("solid", fgColor="FFC7CE")
+
     def __init__(self, file) -> None:
         print(f"Editing excel file {file}")
         # String with excel filename
@@ -94,8 +95,8 @@ class Excel():
                 remove(self.file)
                 raise TypeError("FALSE string found outside expected row.")
             excel_column = get_column_letter(idx[1]+1)
-            self.ws[f'{excel_column}{row}'].fill = RED_FILL
-            self.ws[f'{excel_column}{row}'].font = RED_TEXT
+            self.ws[f'{excel_column}{row}'].fill = Excel.RED_FILL
+            self.ws[f'{excel_column}{row}'].font = Excel.RED_TEXT
 
     def mark_contamination_metrics(self) -> None:
         """
@@ -139,10 +140,10 @@ class Excel():
                 for element in elements_to_find:
                     indices = self.df.stack().index[self.df.stack() == element]
                     for idx in indices:
-                        excel_row = idx[0]+1
-                        excel_column = get_column_letter(sample_col_index+1)
-                        self.ws[f'{excel_column}{excel_row}'].fill = RED_FILL
-                        self.ws[f'{excel_column}{excel_row}'].font = RED_TEXT
+                        xl_row = idx[0]+1
+                        xl_col = get_column_letter(sample_col_index+1)
+                        self.ws[f'{xl_col}{xl_row}'].fill = Excel.RED_FILL
+                        self.ws[f'{xl_col}{xl_row}'].font = Excel.RED_TEXT
 
     def mark_other_metrics(self):
         """
@@ -188,8 +189,8 @@ class Excel():
             # for every row, apply selected operator and formula
             # to highlight cells
             rule = CellIsRule(operator=operator, formula=formula,
-                              stopIfTrue=False, fill=RED_FILL,
-                              font=RED_TEXT)
+                              stopIfTrue=False, fill=Excel.RED_FILL,
+                              font=Excel.RED_TEXT)
             self.ws.conditional_formatting.add(f'D{row+1}:{max_column}{row+1}',
                                                rule)
 
