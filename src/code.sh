@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -exo pipefail
+
 main() {
 
     echo "Value of tsv_input: '$tsv_input'"

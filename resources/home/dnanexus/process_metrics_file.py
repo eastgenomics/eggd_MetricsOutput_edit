@@ -11,7 +11,6 @@ Changes:
         - [DNA Library QC Metrics for MSI] 34
         - [DNA Library QC Metrics for CNV] 38-39
         - [RNA Library QC Metrics] 60-62
-        - [RNA Expanded Metrics] 66-69
     - highlight the subsequent cells if outside thresholds
 
 """
@@ -25,9 +24,6 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font
 from openpyxl.formatting.rule import CellIsRule
 
-RED_TEXT = Font(name='Calibri', color="9C0006")
-RED_FILL = PatternFill("solid", fgColor="FFC7CE")
-
 
 class Excel():
     """
@@ -37,6 +33,10 @@ class Excel():
     Attributes
     ----------
     """
+    # Set a characteristics for highlighted columns
+    RED_TEXT = Font(name='Calibri', color="9C0006")
+    RED_FILL = PatternFill("solid", fgColor="FFC7CE")
+
     def __init__(self, file) -> None:
         print(f"Editing excel file {file}")
         # String with excel filename
@@ -95,8 +95,8 @@ class Excel():
                 remove(self.file)
                 raise TypeError("FALSE string found outside expected row.")
             excel_column = get_column_letter(idx[1]+1)
-            self.ws[f'{excel_column}{row}'].fill = RED_FILL
-            self.ws[f'{excel_column}{row}'].font = RED_TEXT
+            self.ws[f'{excel_column}{row}'].fill = Excel.RED_FILL
+            self.ws[f'{excel_column}{row}'].font = Excel.RED_TEXT
 
     def mark_contamination_metrics(self) -> None:
         """
@@ -127,7 +127,9 @@ class Excel():
 
                 # Store a boolean for each sample and set to false when any
                 # metric does not exceed the USL and LSL thresholds
-                if value_to_compare < LSL or value_to_compare > USL:
+                if value_to_compare == 'NA':
+                    sample_to_highlight = False
+                elif value_to_compare < LSL or value_to_compare > USL:
                     sample_to_highlight = True
                 else:
                     sample_to_highlight = False
@@ -138,10 +140,10 @@ class Excel():
                 for element in elements_to_find:
                     indices = self.df.stack().index[self.df.stack() == element]
                     for idx in indices:
-                        excel_row = idx[0]+1
-                        excel_column = get_column_letter(sample_col_index+1)
-                        self.ws[f'{excel_column}{excel_row}'].fill = RED_FILL
-                        self.ws[f'{excel_column}{excel_row}'].font = RED_TEXT
+                        xl_row = idx[0]+1
+                        xl_col = get_column_letter(sample_col_index+1)
+                        self.ws[f'{xl_col}{xl_row}'].fill = Excel.RED_FILL
+                        self.ws[f'{xl_col}{xl_row}'].font = Excel.RED_TEXT
 
     def mark_other_metrics(self):
         """
@@ -158,11 +160,7 @@ class Excel():
                            'MEDIAN_BIN_COUNT_CNV_TARGET (Count)',
                            'MEDIAN_CV_GENE_500X (NA)',
                            'TOTAL_ON_TARGET_READS (NA)',
-                           'MEDIAN_INSERT_SIZE (NA)',
-                           'PCT_CHIMERIC_READS (NA)',
-                           'PCT_ON_TARGET_READS (NA)',
-                           'SCALED_MEDIAN_GENE_COVERAGE (NA)',
-                           'TOTAL_PF_READS (NA)']
+                           'MEDIAN_INSERT_SIZE (NA)']
 
         # Search for the cell location for every metric from metrics list
         for metric in metrics_to_find:
@@ -191,8 +189,8 @@ class Excel():
             # for every row, apply selected operator and formula
             # to highlight cells
             rule = CellIsRule(operator=operator, formula=formula,
-                              stopIfTrue=False, fill=RED_FILL,
-                              font=RED_TEXT)
+                              stopIfTrue=False, fill=Excel.RED_FILL,
+                              font=Excel.RED_TEXT)
             self.ws.conditional_formatting.add(f'D{row+1}:{max_column}{row+1}',
                                                rule)
 
