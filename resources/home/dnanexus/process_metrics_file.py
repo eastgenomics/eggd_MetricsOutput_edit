@@ -11,7 +11,6 @@ Changes:
         - [DNA Library QC Metrics for MSI] 34
         - [DNA Library QC Metrics for CNV] 38-39
         - [RNA Library QC Metrics] 60-62
-        - [RNA Expanded Metrics] 66-69
     - highlight the subsequent cells if outside thresholds
 
 """
@@ -127,7 +126,9 @@ class Excel():
 
                 # Store a boolean for each sample and set to false when any
                 # metric does not exceed the USL and LSL thresholds
-                if value_to_compare < LSL or value_to_compare > USL:
+                if value_to_compare == 'NA':
+                    sample_to_highlight = False
+                elif value_to_compare < LSL or value_to_compare > USL:
                     sample_to_highlight = True
                 else:
                     sample_to_highlight = False
@@ -158,11 +159,7 @@ class Excel():
                            'MEDIAN_BIN_COUNT_CNV_TARGET (Count)',
                            'MEDIAN_CV_GENE_500X (NA)',
                            'TOTAL_ON_TARGET_READS (NA)',
-                           'MEDIAN_INSERT_SIZE (NA)',
-                           'PCT_CHIMERIC_READS (NA)',
-                           'PCT_ON_TARGET_READS (NA)',
-                           'SCALED_MEDIAN_GENE_COVERAGE (NA)',
-                           'TOTAL_PF_READS (NA)']
+                           'MEDIAN_INSERT_SIZE (NA)']
 
         # Search for the cell location for every metric from metrics list
         for metric in metrics_to_find:
