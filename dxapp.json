@@ -3,7 +3,7 @@
   "title": "Eggd MetricsOutput excel maker",
   "summary": "This app produces the MetricsOutput.xlsx with relevant metrics highlighted per sample. Uses MetricsOutput.tsv file as input. ",
   "dxapi": "1.0.0",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "inputSpec": [
     {
       "name": "tsv_input",
