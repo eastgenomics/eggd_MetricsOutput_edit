@@ -22,7 +22,6 @@ import openpyxl
 import pandas as pd
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font
-from openpyxl.formatting.rule import CellIsRule
 
 
 class Excel():
@@ -35,7 +34,27 @@ class Excel():
     """
     # Set a characteristics for highlighted columns
     RED_TEXT = Font(name='Calibri', color="9C0006")
-    RED_FILL = PatternFill("solid", fgColor="FFC7CE")
+    RED_FILL = PatternFill(patternType="solid", start_color="FFC7CE")
+
+    # Set highlight cell function
+    def highlight_cell(self, xl_col, xl_row):
+        """
+        Given the excel worksheet, highlights a cell if given excel indices
+
+        Parameters
+        ----------
+        xl_col : string
+            Excel column e.g. 'A'
+        xl_row : int
+            Excel row (1 based rows)
+
+        Returns
+        -------
+        None.
+
+        """
+        self.ws[f'{xl_col}{xl_row}'].fill = Excel.RED_FILL
+        self.ws[f'{xl_col}{xl_row}'].font = Excel.RED_TEXT
 
     def __init__(self, file) -> None:
         print(f"Editing excel file {file}")
@@ -83,20 +102,18 @@ class Excel():
         An error will be raised if the string is found outside of row 17
 
         """
-        string_to_find = "FALSE"
         # store a list of cell indices where the contain a string equal to
         # "FALSE"
         false_cells_indices = self.df.stack().index[self.df.stack() ==
-                                                    string_to_find]
+                                                    "FALSE"]
         # Mark every cell from the list in red
         for idx in false_cells_indices:
-            row = idx[0]+1
-            if row != 17:
+            xl_row = idx[0]+1
+            if xl_row != 17:
                 remove(self.file)
                 raise TypeError("FALSE string found outside expected row.")
-            excel_column = get_column_letter(idx[1]+1)
-            self.ws[f'{excel_column}{row}'].fill = Excel.RED_FILL
-            self.ws[f'{excel_column}{row}'].font = Excel.RED_TEXT
+            xl_col = get_column_letter(idx[1]+1)
+            self.highlight_cell(xl_col, xl_row)
 
     def mark_contamination_metrics(self) -> None:
         """
@@ -142,8 +159,7 @@ class Excel():
                     for idx in indices:
                         xl_row = idx[0]+1
                         xl_col = get_column_letter(sample_col_index+1)
-                        self.ws[f'{xl_col}{xl_row}'].fill = Excel.RED_FILL
-                        self.ws[f'{xl_col}{xl_row}'].font = Excel.RED_TEXT
+                        self.highlight_cell(xl_col, xl_row)
 
     def mark_other_metrics(self):
         """
@@ -151,48 +167,47 @@ class Excel():
         values exceed the guidelines
         """
 
-        max_column = get_column_letter(self.ws.max_column)
         metrics_to_find = ['MEDIAN_INSERT_SIZE (bp)',
                            'MEDIAN_EXON_COVERAGE (Count)',
                            'PCT_EXON_50X (%)',
                            'USABLE_MSI_SITES (Count)',
                            'COVERAGE_MAD (Count)',
                            'MEDIAN_BIN_COUNT_CNV_TARGET (Count)',
-                           'MEDIAN_CV_GENE_500X (NA)',
-                           'TOTAL_ON_TARGET_READS (NA)',
-                           'MEDIAN_INSERT_SIZE (NA)']
+                           'MEDIAN_CV_GENE_500X (%)',
+                           'TOTAL_ON_TARGET_READS (Count)',
+                           'MEDIAN_INSERT_SIZE (Count)']
 
-        # Search for the cell location for every metric from metrics list
-        for metric in metrics_to_find:
-            indices = self.df.stack().index[self.df.stack() == metric]
+        # Set a loop for each sample
+        for sample_col_index in range(3, len(self.df.columns)):
+            # Search for the cell location for every metric from metrics list
+            for metric in metrics_to_find:
+                indices = self.df.stack().index[self.df.stack() == metric]
+                # Once cell found, assign variables to USL and LSL guidelines
+                for idx in indices:
+                    row = idx[0]
+                    LSL = self.df.loc[row][idx[1]+1]
+                    USL = self.df.loc[row][idx[1]+2]
+                    sample_value = self.df.loc[row][sample_col_index]
 
-            # Once cell found, assign variables to USL and LSL guidelines
-            for idx in indices:
-                row = idx[0]
-                LSL = self.df.loc[row][idx[1]+1]
-                USL = self.df.loc[row][idx[1]+2]
-
-            # Select the appropriate operator and formula based on
-            # the values of LSL and USL
-            if LSL == 'NA' and USL == 'NA':
-                pass
-            elif LSL == 'NA':
-                operator = 'greaterThan'
-                formula = [USL]
-            elif USL == 'NA':
-                operator = 'lessThan'
-                formula = [LSL]
-            else:
-                operator = 'notBetween'
-                formula = [LSL, USL]
-
-            # for every row, apply selected operator and formula
-            # to highlight cells
-            rule = CellIsRule(operator=operator, formula=formula,
-                              stopIfTrue=False, fill=Excel.RED_FILL,
-                              font=Excel.RED_TEXT)
-            self.ws.conditional_formatting.add(f'D{row+1}:{max_column}{row+1}',
-                                               rule)
+                    # Highlight cells if sample value is outside LSL and USL
+                    if LSL == 'NA' and USL == 'NA':
+                        pass
+                    elif LSL == 'NA' and sample_value != 'NA':
+                        if sample_value > USL:
+                            xl_row = idx[0]+1
+                            xl_col = get_column_letter(sample_col_index+1)
+                            self.highlight_cell(xl_col, xl_row)
+                    elif USL == 'NA' and sample_value != 'NA':
+                        if sample_value < LSL:
+                            xl_row = idx[0]+1
+                            xl_col = get_column_letter(sample_col_index+1)
+                            self.highlight_cell(xl_col, xl_row)
+                    else:
+                        if sample_value != 'NA':
+                            if sample_value < LSL or sample_value > USL:
+                                xl_row = idx[0]+1
+                                xl_col = get_column_letter(sample_col_index+1)
+                                self.highlight_cell(xl_col, xl_row)
 
 
 def parse_args() -> argparse.Namespace:
