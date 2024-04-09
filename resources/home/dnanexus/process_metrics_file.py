@@ -43,8 +43,6 @@ class Excel():
 
         Parameters
         ----------
-        ws : openpyxl.worksheet.worksheet.Worksheet
-            Worksheet highlight a particular cell
         xl_col : string
             Excel column e.g. 'A'
         xl_row : int
@@ -104,11 +102,10 @@ class Excel():
         An error will be raised if the string is found outside of row 17
 
         """
-        string_to_find = "FALSE"
         # store a list of cell indices where the contain a string equal to
         # "FALSE"
         false_cells_indices = self.df.stack().index[self.df.stack() ==
-                                                    string_to_find]
+                                                    "FALSE"]
         # Mark every cell from the list in red
         for idx in false_cells_indices:
             xl_row = idx[0]+1
